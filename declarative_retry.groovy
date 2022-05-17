@@ -15,8 +15,8 @@ pipeline {
 
     post{
         failure {
-            timeout(time: 5, unit: 'Minutes') {
-                retry {
+            timeout(time: 5, unit: 'MINUTES') {
+                retry(3) {
                     ${env.JOB_NAME}.run
                 }
             }
