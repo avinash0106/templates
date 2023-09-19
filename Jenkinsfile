@@ -90,7 +90,8 @@ pipeline {
   post {
     always {
       // Clean up Terraform temporary files and directories
-      deleteDir()
+      // deleteDir()
+      echo "Build Success"
     }
   }
 }
