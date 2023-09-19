@@ -8,31 +8,31 @@ pipeline {
   stages {
     stage('Terraform init') {
       steps {
-        sh 'terraform init'
+        echo 'terraform init'
       }
     }
 
     stage('Terraform validate') {
       steps {
-        sh 'terraform validate'
+        echo 'terraform validate'
       }
     }
 
     stage('Terraform plan') {
       steps {
-        sh 'terraform plan'
+        echo 'terraform plan'
       }
     }
 
     stage('Terraform apply') {
       steps {
-        sh 'terraform apply'
+        echo 'terraform apply'
       }
     }
 
     stage('Terraform destroy') {
       steps {
-        sh 'terraform destroy'
+        echo 'terraform destroy'
       }
     }
   }
