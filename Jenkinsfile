@@ -1,14 +1,14 @@
 pipeline {
-  agent {
-    docker {
-      image "hashicorp/terraform:latest"
-    }
-  }
-
+  // agent {
+  //   docker {
+  //     image "hashicorp/terraform:latest"
+  //   }
+  // }
+  agent any
   stages {
     stage('Terraform init') {
       steps {
-        echo 'terraform init'
+        sh 'terraform -version'
       }
     }
 
