@@ -67,26 +67,26 @@ pipeline {
       }
     }
 
-  //   stage('Terraform Destroy') {
-  //     when {
-  //       // Only run if previous stages were successful
-  //       expression {
-  //         currentBuild.resultIsBetterOrEqualTo('SUCCESS')
-  //       }
-  //     }
-  //     steps {
-  //       script {
-  //         try {
-  //           // Destroy Terraform resources (use with caution)
-  //           sh 'terraform destroy -auto-approve'
-  //         } catch (Exception e) {
-  //           currentBuild.result = 'FAILURE'
-  //           error("Terraform destroy failed: ${e.getMessage()}")
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
+    stage('Terraform Destroy') {
+      when {
+        // Only run if previous stages were successful
+        expression {
+          currentBuild.resultIsBetterOrEqualTo('SUCCESS')
+        }
+      }
+      steps {
+        script {
+          try {
+            // Destroy Terraform resources (use with caution)
+            sh 'terraform destroy -auto-approve'
+          } catch (Exception e) {
+            currentBuild.result = 'FAILURE'
+            error("Terraform destroy failed: ${e.getMessage()}")
+          }
+        }
+      }
+    }
+  }
   post {
     always {
       // Clean up Terraform temporary files and directories
