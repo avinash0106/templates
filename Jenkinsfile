@@ -1,96 +1,65 @@
 pipeline {
-  agent any
-  tools {
-    // Define a Terraform tool installation named 'terraform'
-    terraform 'terraform'
-  }
-  stages {
-    stage('Terraform Init') {
-      steps {
-        script {
-          try {
-            // Initialize Terraform
-            sh 'terraform init'
-          } catch (Exception e) {
-            currentBuild.result = 'FAILURE'
-            error("Terraform initialization failed: ${e.getMessage()}")
-          }
-        }
-      }
+    agent any
+    options {
+        ansiColor('xterm')
     }
+    tools {
+        terraform 'terraform'
 
-    stage('Terraform Validate') {
-      steps {
-        script {
-          try {
-            // Validate Terraform configuration
-            sh 'terraform validate'
-          } catch (Exception e) {
-            currentBuild.result = 'FAILURE'
-            error("Terraform validation failed: ${e.getMessage()}")
-          }
-        }
-      }
     }
+    stages {
+        stage('Checkout') {
+            steps {
+                script {
+                    try {
+                        sh 'cp -r /app/osione-infra/* .'
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        error("Error Copying files ${e.getMessage()}")
+                    }
+                }
+            }
+        }
 
-    stage('Terraform Plan') {
-      steps {
-        script {
-          try {
-            // Generate Terraform execution plan
-            sh 'terraform plan -out=tfplan'
-          } catch (Exception e) {
-            currentBuild.result = 'FAILURE'
-            error("Terraform planning failed: ${e.getMessage()}")
-          }
-        }
-      }
-    }
+        stage('Terraform Initialise') {
+            steps {
+                script {
+                    try {
+                        sh 'terraform init'
+                        sh 'terraform validate'
 
-    stage('Terraform Apply') {
-      when {
-        // Only run if previous stages were successful
-        expression {
-          currentBuild.resultIsBetterOrEqualTo('SUCCESS')
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        error("Terraform planning failed: ${e.getMessage()}")
+                    }
+                }
+            }
         }
-      }
-      steps {
-        script {
-          try {
-            // Apply Terraform changes
-            sh 'terraform apply -auto-approve tfplan'
-          } catch (Exception e) {
-            currentBuild.result = 'FAILURE'
-            error("Terraform apply failed: ${e.getMessage()}")
-          }
-        }
-      }
-    }
 
-    stage('Terraform Destroy') {
-      when {
-        // Only run if previous stages were successful
-        expression {
-          currentBuild.resultIsBetterOrEqualTo('SUCCESS')
+        stage('Terraform Plan/Apply') {
+            steps {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS']]) {
+                    script {
+                        try {
+                        // Set AWS CLI credentials using Jenkins credentials
+                        sh 'aws configure set aws_access_key_id \$AWS_ACCESS_KEY_ID'
+                        sh 'aws configure set aws_secret_access_key \$AWS_SECRET_ACCESS_KEY'
+                        sh 'aws configure set region your-aws-region'
+
+                        // Print AWS CLI configuration for verification (optional)
+                        sh 'aws configure list'
+
+                        sh 'terraform plan -out=tfplan'
+                        // sh 'terraform apply "tfplan" -auto-approve'
+                        } finally {
+                            // Clear AWS CLI credentials after use (optional)
+                            archiveArtifacts allowEmptyArchive: true, artifacts: '**/tfplan', followSymlinks: false
+                            archiveArtifacts allowEmptyArchive: true, artifacts: '**/*.tfstate', followSymlinks: false
+                            echo "Infrastructure is Provisioned!"
+                        }
+                    }
+                }
+            }
         }
-      }
-      steps {
-        script {
-          try {
-            // Destroy Terraform resources (use with caution)
-            sh 'terraform destroy -auto-approve'
-          } catch (Exception e) {
-            currentBuild.result = 'FAILURE'
-            error("Terraform destroy failed: ${e.getMessage()}")
-          }
-        }
-      }
     }
-  }
-  post {
-    always {
-      // Clean up Terraform temporary files and directories
-      deleteDir()
-    }
-  }
 }
