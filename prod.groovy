@@ -61,23 +61,5 @@ pipeline {
                 }
             }
         }
-        stage('Terraform Destroy') {
-          when {
-            expression {
-              currentBuild.resultIsBetterOrEqualTo('SUCCESS')
-            }
-          }
-          steps {
-            script {
-              try {
-                // Destroy Terraform resources (use with caution)
-                sh 'terraform destroy -auto-approve'
-              } catch (Exception e) {
-                currentBuild.result = 'FAILURE'
-                error("Terraform destroy failed: ${e.getMessage()}")
-              }
-            }
-          }
-        }
     }
 }
