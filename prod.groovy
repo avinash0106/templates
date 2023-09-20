@@ -44,7 +44,7 @@ pipeline {
                         // Set AWS CLI credentials using Jenkins credentials
                         sh 'aws configure set aws_access_key_id \$AWS_ACCESS_KEY_ID'
                         sh 'aws configure set aws_secret_access_key \$AWS_SECRET_ACCESS_KEY'
-                        sh 'aws configure set region your-aws-region'
+                        sh 'aws configure set region ap-south-1'
 
                         // Print AWS CLI configuration for verification (optional)
                         sh 'aws configure list'
