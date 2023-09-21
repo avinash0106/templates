@@ -31,7 +31,6 @@ pipeline {
                     try {
                         sh 'terraform init'
                         sh 'terraform validate'
-                        sh 'terraform plan -out=tfplan'
                     } catch (Exception e) {
                         currentBuild.result = 'FAILURE'
                         error("Terraform planning failed: ${e.getMessage()}")
@@ -52,8 +51,8 @@ pipeline {
                             
                             // Print AWS CLI configuration for verification (optional)
                             sh 'aws configure list'
-                            
-                            sh 'terraform apply "tfplan" -auto-approve'
+                            sh 'terraform plan -out=tfplan'
+                            // sh 'terraform apply "tfplan" -auto-approve'
                         }
                     } catch (Exception e) {
                         currentBuild.result = 'FAILURE'
