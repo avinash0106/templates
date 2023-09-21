@@ -16,7 +16,7 @@ pipeline {
             steps {
                 script {
                     try {
-                        sh 'cp -r /apps/terraform/* .'
+                        sh 'cp -r /apps/OUT/terraform/* .'
                     } catch (Exception e) {
                         currentBuild.result = 'FAILURE'
                         error("Error Copying files ${e.getMessage()}")
@@ -83,7 +83,7 @@ pipeline {
                     steps {
                         script {
                             try {
-                                sh 'cp -r /apps/ems-api/* .'
+                                sh 'cp -r /apps/OUT/ems-api/* .'
                                 def IMAGE_NAME = 'osiems'
                                 def ECR_REPOSITORY = 'osiems'
                                 // Build the Docker image
@@ -103,7 +103,7 @@ pipeline {
                     steps {
                         script {
                             try {
-                                sh 'cp -r /apps/tsm-api/* .'
+                                sh 'cp -r /apps/OUT/tsm-api/* .'
                                 def IMAGE_NAME = 'ositsm'
                                 def ECR_REPOSITORY = 'ositsm'
                                 // Build the Docker image
