@@ -168,7 +168,7 @@ pipeline {
         }
         stage ('Deployment Validation') {
             steps {
-                sleep(120)
+                sleep(20)
                 script {
                     try {
                         sh 'curl -I --silent --fail --head http://k8s-osionealb-417d922893-853476251.ap-south-1.elb.amazonaws.com/a1/#/login | grep -q "HTTP/1.1 200"'
