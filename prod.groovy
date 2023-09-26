@@ -48,7 +48,7 @@ pipeline {
                             sh 'aws configure set aws_access_key_id \$AWS_ACCESS_KEY_ID'
                             sh 'aws configure set aws_secret_access_key \$AWS_SECRET_ACCESS_KEY'
                             sh 'aws configure set region ${AWS_REGION}'
-                            
+
                             // Print AWS CLI configuration for verification (optional)
                             sh 'aws configure list'
                             sh 'terraform plan -out=tfplan'
@@ -121,5 +121,65 @@ pipeline {
                 }
             }
         }
+        stage('EKS Config') {
+            steps {
+                script {
+                    try {
+                        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS']]) {
+                            sh "aws eks update-kubeconfig --name eks-cluster-osione-devops --region ${AWS_REGION}"
+                        }
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        error("ECR login failed: ${e.getMessage()}")
+                    }
+                }
+            }
+        }
+        stage('EKS Deploy') {
+            parallel {
+                stage('ems-api') {
+                    steps {
+                        script {
+                            try {
+                                sh 'cp -r /apps/OUT/ems-api/k8-manifest/* .'
+                                // Push the image to ECR
+                                sh "kubectl apply -f ."
+                            } catch (Exception e) {
+                                currentBuild.result = 'FAILURE'
+                                error("Deployment failed: ${e.getMessage()}")
+                            }
+                        }
+                    }
+                }
+                stage('tsm-api') {
+                    steps {
+                        script {
+                            try {
+                                sh 'cp -r /apps/OUT/tsm-api/k8-manifest/* .'
+                                // Push the image to ECR
+                                sh "kubectl apply -f ."
+                            } catch (Exception e) {
+                                currentBuild.result = 'FAILURE'
+                                error("Deployment failed: ${e.getMessage()}")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        stage ('Deployment Validation') {
+            steps {
+                sleep(120)
+                script {
+                    try {
+                        sh 'curl -I http://k8s-osionealb-417d922893-853476251.ap-south-1.elb.amazonaws.com/a1 | grep -q "HTTP/1.1 200 OK'
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        error("Validation failed: ${e.getMessage()}")
+                    }
+                }
+            }
+        }
     }
 }
+
