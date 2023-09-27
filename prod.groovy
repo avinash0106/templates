@@ -51,7 +51,7 @@ pipeline {
                             // Print AWS CLI configuration for verification (optional)
                             sh 'aws configure list'
                             sh 'terraform plan -out=tfplan'
-                            sh 'terraform apply -auto-approve'
+                            // sh 'terraform apply -auto-approve'
                         }
                     } catch (Exception e) {
                         currentBuild.result = 'FAILURE'
@@ -120,52 +120,52 @@ pipeline {
                 }
             }
         }
-        stage('EKS Config') {
-            steps {
-                script {
-                    try {
-                        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS']]) {
-                            sh "aws eks update-kubeconfig --name eks-cluster-osione-devops --region ${AWS_REGION}"
-                        }
-                    } catch (Exception e) {
-                        currentBuild.result = 'FAILURE'
-                        error("ECR login failed: ${e.getMessage()}")
-                    }
-                }
-            }
-        }
-        stage('EKS Deploy') {
-            parallel {
-                stage('ems-api') {
-                    steps {
-                        script {
-                            try {
-                                sh 'cp -r /apps/OUT/ems-api/k8-manifest/* .'
-                                // Push the image to ECR
-                                sh "kubectl apply -f ."
-                            } catch (Exception e) {
-                                currentBuild.result = 'FAILURE'
-                                error("Deployment failed: ${e.getMessage()}")
-                            }
-                        }
-                    }
-                }
-                stage('tsm-api') {
-                    steps {
-                        script {
-                            try {
-                                sh 'cp -r /apps/OUT/tsm-api/k8-manifest/* .'
-                                // Push the image to ECR
-                                sh "kubectl apply -f ."
-                            } catch (Exception e) {
-                                currentBuild.result = 'FAILURE'
-                                error("Deployment failed: ${e.getMessage()}")
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        // stage('EKS Config') {
+        //     steps {
+        //         script {
+        //             try {
+        //                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS']]) {
+        //                     sh "aws eks update-kubeconfig --name eks-cluster-osione-devops --region ${AWS_REGION}"
+        //                 }
+        //             } catch (Exception e) {
+        //                 currentBuild.result = 'FAILURE'
+        //                 error("ECR login failed: ${e.getMessage()}")
+        //             }
+        //         }
+        //     }
+        // }
+        // stage('EKS Deploy') {
+        //     parallel {
+        //         stage('ems-api') {
+        //             steps {
+        //                 script {
+        //                     try {
+        //                         sh 'cp -r /apps/OUT/ems-api/k8-manifest/* .'
+        //                         // Push the image to ECR
+        //                         sh "kubectl apply -f ."
+        //                     } catch (Exception e) {
+        //                         currentBuild.result = 'FAILURE'
+        //                         error("Deployment failed: ${e.getMessage()}")
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //         stage('tsm-api') {
+        //             steps {
+        //                 script {
+        //                     try {
+        //                         sh 'cp -r /apps/OUT/tsm-api/k8-manifest/* .'
+        //                         // Push the image to ECR
+        //                         sh "kubectl apply -f ."
+        //                     } catch (Exception e) {
+        //                         currentBuild.result = 'FAILURE'
+        //                         error("Deployment failed: ${e.getMessage()}")
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
         // stage ('Deployment Validation') {
         //     steps {
         //         sleep(20)
