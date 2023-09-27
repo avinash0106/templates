@@ -15,7 +15,7 @@ pipeline {
             steps {
                 script {
                     try {
-                        sh 'cp -r /apps/osione-infra/* .'
+                        sh 'cp -r /apps/OUT/terraform/* .'
                     } catch (Exception e) {
                         currentBuild.result = 'FAILURE'
                         error("Error Copying files ${e.getMessage()}")
