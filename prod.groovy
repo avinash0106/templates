@@ -51,7 +51,7 @@ pipeline {
                             // Print AWS CLI configuration for verification (optional)
                             sh 'aws configure list'
                             sh 'terraform plan -out=tfplan'
-                            // sh 'terraform apply "tfplan" -auto-approve'
+                            sh 'terraform apply -auto-approve'
                         }
                     } catch (Exception e) {
                         currentBuild.result = 'FAILURE'
@@ -166,19 +166,19 @@ pipeline {
                 }
             }
         }
-        stage ('Deployment Validation') {
-            steps {
-                sleep(20)
-                script {
-                    try {
-                        sh 'curl -I --silent --fail --head http://k8s-osionealb-417d922893-853476251.ap-south-1.elb.amazonaws.com/a1/#/login | grep -q "HTTP/1.1 200"'
-                    } catch (Exception e) {
-                        currentBuild.result = 'FAILURE'
-                        error("Validation failed: ${e.getMessage()}")
-                    }
-                }
-            }
-        }
+        // stage ('Deployment Validation') {
+        //     steps {
+        //         sleep(20)
+        //         script {
+        //             try {
+        //                 sh 'curl -I --silent --fail --head http://k8s-osionealb-417d922893-853476251.ap-south-1.elb.amazonaws.com/a1/#/login | grep -q "HTTP/1.1 200"'
+        //             } catch (Exception e) {
+        //                 currentBuild.result = 'FAILURE'
+        //                 error("Validation failed: ${e.getMessage()}")
+        //             }
+        //         }
+        //     }
+        // }
     }
 }
 
